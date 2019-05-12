@@ -1,0 +1,196 @@
+#%RAML 1.0
+---
+title: 1G module RESTful
+baseUri: http://example.api.com/{version}
+version: v1.0
+mediaType: application/json
+
+/:
+  displayName: Base
+  get: 
+    description: List of resources that can be accesses from base url
+    responses:
+      200:
+        body:
+          application/json:  
+            example: !include ./examples/v1.0/base-get.json
+/status:
+  displayName: Status
+  get:
+    description: Check firmware/hardware module compatibility, return result.
+    responses: 
+      200: 
+        description: Return when firmware and hardware modules are compatible.
+        body:
+          type: Status
+          application/json:
+            example: !include ./examples/v1.0/status-get-response-200.json
+      400: 
+        description: Return when firmware and hardware are incompatible. No further actions with the module can be performed
+        body:
+          type: ErrorSchema
+/init:
+  displayName: Initialization
+  post:
+    description: Perform module initialization.
+    responses: 
+      201:
+        description: Module initialization is performed. No response body.
+      500: 
+        description: Returned when there are internal issues with the module.
+        body: 
+          type: ErrorSchema
+
+/reset:
+  displayName: Reset
+  post:
+    description: Perform module reset.
+    responses:
+      201:
+        description: Module reset is performed. No response body.
+      500:
+        description: Returned when there are internal issues with the module.
+        body:
+          type: ErrorSchema
+/config:
+  displayName: Configuration
+  get:
+    description: Obtain module configuration (default if nothing was applied before).
+    responses:
+      200:
+        description: Return when configuration obtained successfully.
+        body:
+          type: Configuration
+          application/json:
+            example: !include ./examples/v1.0/config-get-response-200.json
+  post:
+    description: Set module configuration
+    body:
+      type: Configuration
+      application/json:
+        example: !include ./examples/v1.0/config-post.json
+    responses:
+      201:
+        description: Performs setup of passed configuration. No response body.
+      400:
+        description: Returned when the POST request is incorrectly formatted or missing mandatory attributes.
+        body:
+          type: ErrorSchema
+  patch:
+    description: Partially edit module configuration.
+    body:
+      type: Partial configuration
+      application/json:
+        example: !include ./examples/v1.0/config-patch.json
+    responses: 
+      200:
+        description: Returned when configuration is updated successfully. Updated configuration is returned in the response.
+        body: 
+          type: Configuration
+          application/json:
+            example: !include ./examples/v1.0/config-patch-response-200.json
+      400:
+        description: Returned when the PATCH request is incorrectly formatted or has incorrect values.
+        body:
+          type: ErrorSchema
+  delete:
+    description: Removes current configuration in order to reset to default.
+    responses: 
+      200:
+        description: Returned when configuration is removed successfully. Default configuration is returned in response.
+        body:
+          type: Configuration
+          application/json:
+            example: !include ./examples/v1.0/config-delete-response-200.json
+      404:
+        description: Returned when no configuration found (default configuration is already applied).
+        body:
+          type: ErrorSchema
+/streams:
+  displayName: Streams
+  get:
+    description: List all available streams.
+    queryParameters: 
+      id: 
+        description: id of the stream in UUID4 format
+        required: true
+    responses:
+      200:  
+        body:
+          type: Stream[]
+          application/json:
+            example: !include ./examples/v1.0/streams-get-response-200.json  
+  /validate:
+    post:
+      description: If module is in RX mode, validate if it can receive specific stream
+      body:
+        description: TX stream parameters
+        type: Stream
+        application/json:
+          example: !include ./v1.0/stream-validate-post.json
+      responses:
+        202:
+          description: Module is ok to receive the stream. No response body.
+        400: 
+          description: Returned when the POST request is incorrectly formatted or has missing values.
+          body:
+            type: ErrorSchema
+        406:
+          description: Module is not acceptable to receiver stream.
+          body:
+            type: ErrorSchema
+        
+
+
+  /{id}:
+    get:
+      description: Get information on specific stream.
+      responses:
+        200:  
+          body:
+            type: Stream
+            application/json:
+              examples: 
+                rx_stream: !include ./examples/v1.0/streams-id-get-response-200-rx.json
+                tx_stream: !include ./examples/v1.0/streams-id-get-response-200-tx.json
+
+        404:
+          description: Returned when the network device with the id does not exist.
+          body:
+            type: ErrorSchema
+    put:
+      description: Create a stream with specific id. Location header should indicate the location of the stream.
+      body:
+        type: Stream
+        application/json:
+          examples:
+            rx_stream: !include ./examples/v1.0/streams-id-put-rx.json
+            tx_stream: !include ./examples/v1.0/streams-id-put-tx.json
+      
+      responses: 
+        201:
+          headers:
+            Location:
+              example: /streams/26cc61de-65db-11e9-a923-1681be663d3e/
+        400: 
+          description: Returned when the PUT request is incorrectly formatted or has missing values. Also returned when exact same stream with given id already exists. Explicit message might be added to indicate the cause of the error.
+          body:
+            type: ErrorSchema
+    delete:
+      description: Delete the stream with specific id.
+      responses: 
+        204:
+          description: Returned when stream is successfully deleted. No response body.
+        404:
+          description: Returned when stream with specified id is not existent.
+          body:
+            type: ErrorSchema 
+    /preview:
+      get:
+        description: Returns thumbnail of a specific stream
+        responses:
+          200:
+            body:
+              type: JPEG thumbnail
+
+

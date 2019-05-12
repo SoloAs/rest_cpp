@@ -1,0 +1,8 @@
+{
+    "mode": "RX",
+    "company": "Macnica",
+    "ip": "192.168.59.197",
+    "dhcp": "disabled",
+    "dns": "8.8.8.8",
+    "igmp": "enabled"
+}

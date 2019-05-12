@@ -1,0 +1,11 @@
+{
+    "id": "f28cab80-65d6-11e9-a923-1681be543d3e",
+    "source_port": "5555",
+    "destination_address": "224.0.0.2",
+    "destination_port": "9999",
+    "ttl": "60",
+    "smpte_type": "ST2110",
+    "video_format": "1080p",
+    "framerate": "60",
+    "media_channel": "2"
+}
