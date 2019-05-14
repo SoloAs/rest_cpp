@@ -4,10 +4,10 @@ const int MAX_CONFIG_SIZE = 1000;
 
 struct config
 {
-    std::string mode;
-    std::string company;
-    std::string ip;
-    std::string dns;
+    char mode[8];
+    char company[64];
+    char ip[20];
+    char dns[20];
     bool dhcp;
     bool igmp;
 };

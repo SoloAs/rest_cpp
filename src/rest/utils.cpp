@@ -45,3 +45,12 @@ int get_request_body(struct mg_connection *conn, char *post_data, long long leng
 	post_data[length] = 0;						// null at the end of the string;
 	return mg_read(conn, post_data, length);
 }
+
+std::string retrieve_id(const struct mg_request_info *params)
+{
+    std::string data = params->local_uri;
+    if (data[data.size()-1] == '/')
+        data.pop_back();
+    std::string stream_id = data.substr(data.rfind("/") + 1, data.size());
+    return stream_id;
+}

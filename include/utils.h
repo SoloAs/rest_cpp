@@ -6,3 +6,5 @@ bool error(CivetServer *server, struct mg_connection *conn, unsigned int code, c
 bool success(CivetServer *server, struct mg_connection *conn, unsigned int code, char const *description, nlohmann::json body = NULL);
 
 int get_request_body(struct mg_connection *conn, char *post_data, long long length);
+
+std::string retrieve_id(const struct mg_request_info *params);

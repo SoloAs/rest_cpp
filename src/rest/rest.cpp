@@ -42,6 +42,14 @@ using json = nlohmann::json;
 config *current_config = new config();
 config default_config = {"RX", "Macnica", "192.168.59.11", "8.8.8.8", false, false};
 
+init_params *hw_config = new init_params();
+
+// tx_stream_info tx_streams[8];
+// rx_stream_info rx_streams[8];
+
+std::vector<tx_stream_info> tx_streams;
+std::vector<rx_stream_info> rx_streams;
+
 
 /* Exit flag for main loop */
 volatile bool exitNow = false;
@@ -131,6 +139,28 @@ class InitHandler : public CivetHandler
 		bool handlePost(CivetServer *server, struct mg_connection *conn)
 		{
 			ll_api_class *ll_api = ll_api_class::get_instance();
+
+			// const mg_request_info *ri = mg_get_request_info(conn);
+			// char *post_data_c = new char[ri->content_length + 1]; // one byte for null symbol
+			// int request_result = get_request_body(conn, post_data_c, ri->content_length);
+			// std::string post_data(post_data_c); 
+
+		
+			// if (request_result > 0) 
+			// {
+			// 	json j = json::parse(post_data);
+				
+			// 	hw_config->init_hw_clk_rate = j["clockrate"];
+			// 	hw_config->tx_port = j["tx_port"];
+			// 	hw_config->rx_port = j["rx_port"];
+			// 	hw_config->dev_number = j["dev_number"];
+			// 	current_config->dhcp = j["dhcp"];
+			// 	current_config->igmp = j["igmp"];
+
+			// } TODO: extend when real init comes down
+
+
+
 			LLError result = ll_api->init();
 
 			if (result == LLError::LL_NO_ERROR)
@@ -180,6 +210,8 @@ class ConfigHandler : public CivetHandler
 				{"igmp", current_config->igmp}
 			};
 
+
+
 			return success(server, conn, 200, "OK", json_config);
 		};
 
@@ -190,19 +222,23 @@ class ConfigHandler : public CivetHandler
 			int result = get_request_body(conn, post_data_c, ri->content_length);
 			std::string post_data(post_data_c); 
 
-		
+			
 			if (result > 0) 
 			{
 				json j = json::parse(post_data);
 				
-				current_config->mode = j["mode"];
-				current_config->company = j["company"];
-				current_config->ip = j["ip"];
-				current_config->dns = j["dns"];
+				
+				// current_config->mode = ((std::string)j["mode"]).c_str();
+				strcpy(current_config->mode, ((std::string)j["mode"]).c_str());
+				// current_config->company = j["company"];
+				strcpy(current_config->company, ((std::string)j["company"]).c_str());
+				// current_config->ip = j["ip"];
+				strcpy(current_config->ip, ((std::string)j["ip"]).c_str());
+				//current_config->dns = j["dns"];
+				strcpy(current_config->dns, ((std::string)j["dns"]).c_str());
 				current_config->dhcp = j["dhcp"];
 				current_config->igmp = j["igmp"];
 
-				
 				// TODO: handle params change
 
 
@@ -233,7 +269,8 @@ class ConfigHandler : public CivetHandler
 				for (json::iterator it = j.begin(); it != j.end(); ++it) {
 					if (it.key() == "company") 
 					{
-						current_config->company = j["company"];
+						// current_config->company = j["company"];
+						strcpy(current_config->company, ((std::string)j["company"]).c_str());
 					}
 					if (it.key() == "dhcp") 
 					{
@@ -241,7 +278,8 @@ class ConfigHandler : public CivetHandler
 					}
 					if (it.key() == "dns") 
 					{
-						current_config->dns = j["dns"];
+						// current_config->dns = j["dns"];
+						strcpy(current_config->dns, ((std::string)j["dns"]).c_str());
 					}
 					if (it.key() == "igmp") 
 					{
@@ -249,11 +287,13 @@ class ConfigHandler : public CivetHandler
 					}
 					if (it.key() == "ip") 
 					{
-						current_config->ip = j["ip"];
+						// current_config->ip = j["ip"];
+						strcpy(current_config->ip, ((std::string)j["ip"]).c_str());
 					}
 					if (it.key() == "mode") 
 					{
-						current_config->mode = j["mode"];
+						// current_config->mode = j["mode"];
+						strcpy(current_config->mode, ((std::string)j["mode"]).c_str());
 					}
 				}
 			} else
@@ -315,7 +355,176 @@ class StreamsHandler : public CivetHandler
 {
 	bool handleGet(CivetServer *server, struct mg_connection *conn)
 	{
+		const mg_request_info *ri = mg_get_request_info(conn);
+		std::string stream_id = retrieve_id(ri);
 
+		if (stream_id.compare("preview") != 0)
+		{
+			return success(server, conn, 200, "OK"); // TODO: finish preview acquiring
+		}
+
+		if (stream_id.compare("streams") != 0) // single stream returned
+		{
+			if (strcmp(current_config->mode, "TX") == 0) 
+			{
+				for (int i = 0; i < tx_streams.size(); i++)
+				{
+					if (strcmp(tx_streams[i].id, stream_id.c_str()) == 0)
+					{
+						json stream_json = {
+							{"source_port", tx_streams[i].udp_sp},
+							{"destination_port", tx_streams[i].udp_dp},
+							{"ttl", tx_streams[i].ttl},
+							{"smpte_type", tx_streams[i].smpte_type},
+							{"video_format", tx_streams[i].video_pt},
+							{"media_channel", tx_streams[i].media_chan},
+							{"vlan", tx_streams[i].vlan},
+							{"audio_format", tx_streams[i].audio_pt},
+							{"destination_address", tx_streams[i].ip_da},
+							{"id", tx_streams[i].id}
+						};
+						return success(server, conn, 200, "OK", stream_json);
+					}
+				}
+				return error(server, conn, 404, "Not Found", "Not Found");
+			} else 
+			{
+				for (int i = 0; i < rx_streams.size(); i++)
+				{
+					if (strcmp(rx_streams[i].id, stream_id.c_str()) == 0)
+					{
+						json stream_json = {
+							{"playout_delay", rx_streams[i].playout_delay},
+							{"destination_port", rx_streams[i].udp_dp},
+							{"frame_rate", rx_streams[i].frame_rate},
+							{"smpte_type", rx_streams[i].smpte_type},
+							{"video_format", rx_streams[i].vid_format},
+							{"media_channel", rx_streams[i].media_chan},
+							{"audio_channel", rx_streams[i].aud_chan},
+							{"destination_address", rx_streams[i].ip_da},
+							{"id", rx_streams[i].id}
+						};
+						return success(server, conn, 200, "OK", stream_json);
+					}
+				}
+				return error(server, conn, 404, "Not Found", "Not Found");
+			}
+		} else
+		{
+			// TODO: implement return multiple streams
+		}
+	}
+
+		
+		
+	
+
+	bool handlePut(CivetServer *server, struct mg_connection *conn)
+	{
+		ll_api_class *ll_api = ll_api_class::get_instance();
+		const mg_request_info *ri = mg_get_request_info(conn);
+		
+		std::string stream_id = retrieve_id(ri);
+
+		char *put_data_c = new char[ri->content_length + 1]; // one byte for null symbol
+		int result = get_request_body(conn, put_data_c, ri->content_length);
+		std::string put_data(put_data_c);
+		json j = json::parse(put_data);
+
+		if (strcmp(current_config->mode, "TX") == 0) 
+		{
+			if (!j["frame_rate"].is_null()) // TODO: check if incoming flow is TX
+			{
+				if (result > 0) 
+				{	
+					tx_stream_info tx_stream;
+					tx_stream.udp_sp = std::stoi((std::string)j["source_port"]);
+					tx_stream.udp_dp = std::stoi((std::string)j["destination_port"]);
+					tx_stream.ttl = std::stoi((std::string)j["ttl"]);
+					tx_stream.smpte_type = std::stoi((std::string)j["smpte_type"]);
+					tx_stream.video_pt = std::stoi((std::string)j["video_format"]);
+					tx_stream.media_chan = std::stoi((std::string)j["media_channel"]);
+					tx_stream.vlan = std::stoi((std::string)j["vlan"]);
+					tx_stream.audio_pt = std::stoi((std::string)j["audio_format"]);
+					
+					strcpy(tx_stream.ip_da, ((std::string)j["destination_address"]).c_str());
+					strcpy(tx_stream.id, stream_id.c_str());
+
+					LLError result = ll_api->set_tx_stream(tx_stream);
+					if (result == LLError::LL_NO_ERROR) 
+					{
+						tx_streams.push_back(tx_stream);
+						return success(server, conn, 201, "Created");
+					} else 
+					{
+						return error(server, conn, 500, "Internal Server Error", "Hardware failure");
+					}
+				} else 
+				{
+					return error(server, conn, 400, "Bad Request", "Incorrect or missing mandatory attributes");
+				}
+			} else
+			{
+				return error(server, conn, 400, "Bad Request", "Incorrect or missing mandatory attributes");
+			}
+		} else
+		{
+			if (j["frame_rate"].is_null()) // TODO: check if incoming flow is RX
+			{
+				if (result > 0) 
+				{	
+					rx_stream_info rx_stream;
+					rx_stream.udp_dp = std::stoi((std::string)j["destination_port"]);
+					rx_stream.playout_delay = std::stoi((std::string)j["playout_delay"]);
+					rx_stream.smpte_type = std::stoi((std::string)j["smpte_type"]);
+					rx_stream.media_chan = std::stoi((std::string)j["media_channel"]);
+					rx_stream.aud_chan = std::stoi((std::string)j["audio_channel"]);
+					rx_stream.frame_rate = std::stoi((std::string)j["frame_rate"]);
+
+					strcpy(rx_stream.vid_format, ((std::string)j["video_format"]).c_str());
+					strcpy(rx_stream.ip_da, ((std::string)j["destination_address"]).c_str());
+					strcpy(rx_stream.id, stream_id.c_str());
+
+					LLError result = ll_api->set_rx_stream(rx_stream);
+					if (result == LLError::LL_NO_ERROR) 
+					{
+						rx_streams.push_back(rx_stream);
+						return success(server, conn, 201, "Created");
+					} else 
+					{
+						return error(server, conn, 500, "Internal Server Error", "Hardware failure");
+					}
+				} else 
+				{
+					return error(server, conn, 400, "Bad Request", "Incorrect or missing mandatory attributes");
+				}
+
+			} else
+			{
+				return error(server, conn, 400, "Bad Request", "Incorrect or missing mandatory attributes");
+			}
+			
+		}
+	}
+
+	bool handleDelete(CivetServer *server, struct mg_connection *conn)
+	{
+		ll_api_class *ll_api = ll_api_class::get_instance();
+		const mg_request_info *ri = mg_get_request_info(conn);
+		
+		std::string stream_id = retrieve_id(ri);
+		
+		// TODO: implement delete stream
+
+
+		LLError result = ll_api->stop_stream(const_cast<char*>(stream_id.c_str()));
+		if (result == LLError::LL_NO_ERROR) 
+		{
+			
+		} else 
+		{
+			
+		}
 	}
 
 };
@@ -377,7 +586,6 @@ int main(int argc, char *argv[])
 
 	printf("Run server at http://localhost:%s%s\n", PORT, EXAMPLE_URI);
 	printf("Exit at http://localhost:%s%s\n", PORT, EXIT_URI);
-	printf("exit uri %s\n", EXIT_URI);
 
 	while (!exitNow) {
 		sleep(1);
