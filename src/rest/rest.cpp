@@ -358,28 +358,27 @@ class StreamsHandler : public CivetHandler
 		const mg_request_info *ri = mg_get_request_info(conn);
 		std::string stream_id = retrieve_id(ri);
 
-		if (stream_id.compare("preview") != 0)
+		if (stream_id == "preview")
 		{
 			return success(server, conn, 200, "OK"); // TODO: finish preview acquiring
 		}
-
-		if (stream_id.compare("streams") != 0) // single stream returned
+		if (stream_id != "streams") // call for single stream (/streams/:id)
 		{
 			if (strcmp(current_config->mode, "TX") == 0) 
 			{
-				for (int i = 0; i < tx_streams.size(); i++)
+				for (uint i = 0; i < tx_streams.size(); i++)
 				{
 					if (strcmp(tx_streams[i].id, stream_id.c_str()) == 0)
 					{
 						json stream_json = {
-							{"source_port", tx_streams[i].udp_sp},
-							{"destination_port", tx_streams[i].udp_dp},
-							{"ttl", tx_streams[i].ttl},
-							{"smpte_type", tx_streams[i].smpte_type},
-							{"video_format", tx_streams[i].video_pt},
-							{"media_channel", tx_streams[i].media_chan},
-							{"vlan", tx_streams[i].vlan},
-							{"audio_format", tx_streams[i].audio_pt},
+							{"source_port",  std::to_string(tx_streams[i].udp_sp)},
+							{"destination_port",  std::to_string(tx_streams[i].udp_dp)},
+							{"ttl",  std::to_string(tx_streams[i].ttl)},
+							{"smpte_type",  std::to_string(tx_streams[i].smpte_type)},
+							{"video_format",  std::to_string(tx_streams[i].video_pt)},
+							{"media_channel",  std::to_string(tx_streams[i].media_chan)},
+							{"vlan",  std::to_string(tx_streams[i].vlan)},
+							{"audio_format",  std::to_string(tx_streams[i].audio_pt)},
 							{"destination_address", tx_streams[i].ip_da},
 							{"id", tx_streams[i].id}
 						};
@@ -389,18 +388,18 @@ class StreamsHandler : public CivetHandler
 				return error(server, conn, 404, "Not Found", "Not Found");
 			} else 
 			{
-				for (int i = 0; i < rx_streams.size(); i++)
+				for (uint i = 0; i < rx_streams.size(); i++)
 				{
 					if (strcmp(rx_streams[i].id, stream_id.c_str()) == 0)
 					{
 						json stream_json = {
-							{"playout_delay", rx_streams[i].playout_delay},
-							{"destination_port", rx_streams[i].udp_dp},
-							{"frame_rate", rx_streams[i].frame_rate},
-							{"smpte_type", rx_streams[i].smpte_type},
+							{"playout_delay", std::to_string(rx_streams[i].playout_delay)},
+							{"destination_port", std::to_string(rx_streams[i].udp_dp)},
+							{"frame_rate", std::to_string(rx_streams[i].frame_rate)},
+							{"smpte_type", std::to_string(rx_streams[i].smpte_type)},
+							{"media_channel",std::to_string(rx_streams[i].media_chan)},
+							{"audio_channel", std::to_string(rx_streams[i].aud_chan)},
 							{"video_format", rx_streams[i].vid_format},
-							{"media_channel", rx_streams[i].media_chan},
-							{"audio_channel", rx_streams[i].aud_chan},
 							{"destination_address", rx_streams[i].ip_da},
 							{"id", rx_streams[i].id}
 						};
@@ -409,9 +408,47 @@ class StreamsHandler : public CivetHandler
 				}
 				return error(server, conn, 404, "Not Found", "Not Found");
 			}
-		} else
+		} else // call for multiple streams (/streams)
 		{
+			auto streams_json = json::array();
 			// TODO: implement return multiple streams
+			if (strcmp(current_config->mode, "TX") == 0)
+			{
+				for (int i = 0; i < tx_streams.size(); i++)
+				{
+					json stream_json = {
+						{"source_port",  std::to_string(tx_streams[i].udp_sp)},
+						{"destination_port",  std::to_string(tx_streams[i].udp_dp)},
+						{"ttl",  std::to_string(tx_streams[i].ttl)},
+						{"smpte_type",  std::to_string(tx_streams[i].smpte_type)},
+						{"video_format",  std::to_string(tx_streams[i].video_pt)},
+						{"media_channel",  std::to_string(tx_streams[i].media_chan)},
+						{"vlan",  std::to_string(tx_streams[i].vlan)},
+						{"audio_format",  std::to_string(tx_streams[i].audio_pt)},
+						{"destination_address", tx_streams[i].ip_da},
+						{"id", tx_streams[i].id}
+					};
+					streams_json.push_back(stream_json);
+				}
+			} else
+			{
+				for (uint i = 0; i < rx_streams.size(); i++)
+				{
+					json stream_json = {
+							{"playout_delay", std::to_string(rx_streams[i].playout_delay)},
+							{"destination_port", std::to_string(rx_streams[i].udp_dp)},
+							{"frame_rate", std::to_string(rx_streams[i].frame_rate)},
+							{"smpte_type", std::to_string(rx_streams[i].smpte_type)},
+							{"media_channel",std::to_string(rx_streams[i].media_chan)},
+							{"audio_channel", std::to_string(rx_streams[i].aud_chan)},
+							{"video_format", rx_streams[i].vid_format},
+							{"destination_address", rx_streams[i].ip_da},
+							{"id", rx_streams[i].id}
+						};
+					streams_json.push_back(stream_json);
+				}
+			}
+			return success(server, conn, 200, "OK", streams_json);
 		}
 	}
 
@@ -426,14 +463,16 @@ class StreamsHandler : public CivetHandler
 		
 		std::string stream_id = retrieve_id(ri);
 
+
 		char *put_data_c = new char[ri->content_length + 1]; // one byte for null symbol
 		int result = get_request_body(conn, put_data_c, ri->content_length);
 		std::string put_data(put_data_c);
+
 		json j = json::parse(put_data);
 
 		if (strcmp(current_config->mode, "TX") == 0) 
 		{
-			if (!j["frame_rate"].is_null()) // TODO: check if incoming flow is TX
+			if (j["frame_rate"].is_null()) // TODO: check if incoming flow is TX
 			{
 				if (result > 0) 
 				{	
@@ -469,7 +508,7 @@ class StreamsHandler : public CivetHandler
 			}
 		} else
 		{
-			if (j["frame_rate"].is_null()) // TODO: check if incoming flow is RX
+			if (!j["frame_rate"].is_null()) // TODO: check if incoming flow is RX
 			{
 				if (result > 0) 
 				{	
@@ -484,7 +523,6 @@ class StreamsHandler : public CivetHandler
 					strcpy(rx_stream.vid_format, ((std::string)j["video_format"]).c_str());
 					strcpy(rx_stream.ip_da, ((std::string)j["destination_address"]).c_str());
 					strcpy(rx_stream.id, stream_id.c_str());
-
 					LLError result = ll_api->set_rx_stream(rx_stream);
 					if (result == LLError::LL_NO_ERROR) 
 					{
@@ -513,18 +551,46 @@ class StreamsHandler : public CivetHandler
 		const mg_request_info *ri = mg_get_request_info(conn);
 		
 		std::string stream_id = retrieve_id(ri);
-		
+
 		// TODO: implement delete stream
 
 
 		LLError result = ll_api->stop_stream(const_cast<char*>(stream_id.c_str()));
-		if (result == LLError::LL_NO_ERROR) 
+		if (result == LLError::LL_NO_ERROR)
 		{
-			
+			if (strcmp(current_config->mode, "TX") == 0) 
+			{
+				for (uint i = 0; i < tx_streams.size(); i++)
+				{
+					if (stream_id == tx_streams[i].id)
+					{
+						tx_streams.erase(tx_streams.begin() + i);
+						return success(server, conn, 204, "Deleted");
+					}
+				}
+			} else 
+			{
+				for (uint i = 0; i < rx_streams.size(); i++)
+				{
+					if (stream_id == rx_streams[i].id)
+					{
+						rx_streams.erase(rx_streams.begin() + i);
+						return success(server, conn, 204, "Deleted");
+					}
+				}
+			}		
 		} else 
 		{
-			
+			if (result == LLError::LL_WRONG_PARAM) // is it what LL API returns if stream is non-existent ??
+			{
+				return error(server, conn, 404, "Not Found", "Not Found"); 
+			} else
+			{
+				return error(server, conn, 500, "Internal Server Error", "Hardware failure");
+			}
 		}
+		
+		
 	}
 
 };
@@ -552,11 +618,11 @@ int main(int argc, char *argv[])
 	    "document_root", DOCUMENT_ROOT, "listening_ports", PORT, 0};
     
     std::vector<std::string> cpp_options;
-    for (int i=0; i<(sizeof(options)/sizeof(options[0])-1); i++) {
+    for (uint i = 0; i < (sizeof(options)/sizeof(options[0])-1); i++) {
         cpp_options.push_back(options[i]);
     }
 
-	
+	// TODO: get call to LL API to receive all the flows information
 
 	// CivetServer server(options); // <-- C style start
 	CivetServer server(cpp_options); // <-- C++ style start
