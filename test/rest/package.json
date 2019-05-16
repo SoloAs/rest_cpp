@@ -1,0 +1,30 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "Mocha & Chai test suit for 1G RESTful API",
+  "main": "tests.js",
+  "scripts": {
+    "start": "SET NODE_ENV=dev && node server.js",
+    "test": "mocha --timeout 10000"
+  },
+  "keywords": [
+    "proav",
+    "restful",
+    "llapi",
+    "civetweb"
+  ],
+  "author": "Tyutyarev Alexander",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.15.1",
+    "config": "^1.20.1",
+    "express": "^4.13.4",
+    "mongoose": "^4.4.15",
+    "morgan": "^1.7.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-http": "^2.0.1",
+    "mocha": "^2.5.3"
+  }
+}
