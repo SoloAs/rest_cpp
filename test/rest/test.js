@@ -14,11 +14,18 @@ chai.use(chaiHttp);
 // start RESTful service
 child = exec(executable, function (error, stdout, stderr) {
   if (error !== null) {
-    console.log("exec error: " + error);
+    console.log("Execution error: " + error);
+    console.log("\x1b[31m", "Shutting down test suite");
+    process.exit(0);
   }
 });
 
-describe("BASEURL", () => {
+describe("Starting RESTful Service", () => {
+  before((done) => {
+    setTimeout(() => {
+        done();
+    }, 3000)
+  })
   describe("/GET baseurl", () => {
     it("it should GET available resources list", (done) => {
       chai.request(server + apiVersion)

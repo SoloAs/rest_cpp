@@ -10,3 +10,7 @@ bin/*
 
 #ignore VSCODE stuff
 .vscode
+
+node_modules
+package-lock.json
+

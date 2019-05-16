@@ -22,7 +22,7 @@ LIBS += -lllapi
 
 all: $(PROG)
 
-$(PROG): $(CIVETWEB_LIB) $(LLAPI_LIB) $(SRC)
+$(PROG): $(CIVETWEB_LIB) $(LLAPI_LIB) $(SRC) test
 	$(CXX) -Llib -Wl,-rpath=/home/alexander/work/pro-av-work/rest/lib -o bin/$@ $(CFLAGS) $(LDFLAGS) $(SRC) lib/$(CIVETWEB_LIB) $(LIBS)
 
 
@@ -34,8 +34,17 @@ $(LLAPI_LIB):
 	$(MAKE) -C $(LLAPI)
 	
 
-clean:
-	rm -f build/* bin/* lib/*
+rest:
+	rm -f bin/rest_cpp
+	$(CXX) -Llib -Wl,-rpath=/home/alexander/work/pro-av-work/rest/lib -o bin/$@ $(CFLAGS) $(LDFLAGS) $(SRC) lib/$(CIVETWEB_LIB) $(LIBS) && mv bin/rest bin/rest_cpp
 	
-.PHONY: all clean
+test:
+	cd test/rest && npm i
+
+clean:
+	rm -f build/* bin/* lib/* test/rest/package-lock.json
+	rm -rf test/rest/node_modules
+
+	
+.PHONY: all clean test
 

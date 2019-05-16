@@ -650,7 +650,12 @@ int main(int argc, char *argv[])
 	server.addHandler(STREAMS_URI, h_streams);
 
 
-	printf("Run server at http://localhost:%s%s\n", PORT, EXAMPLE_URI);
+	printf("Run server at http://localhost:%s/\n", PORT);
+	printf("Status API at http://localhost:%s%s\n", PORT, STATUS_URI);
+	printf("Init API at http://localhost:%s%s\n", PORT, INIT_URI);
+	printf("Reset API at http://localhost:%s%s\n", PORT, RESET_URI);
+	printf("Config API at http://localhost:%s%s\n", PORT, CONFIG_URI);
+	printf("Streams API at http://localhost:%s%s\n", PORT, STREAMS_URI);
 	printf("Exit at http://localhost:%s%s\n", PORT, EXIT_URI);
 
 	while (!exitNow) {
