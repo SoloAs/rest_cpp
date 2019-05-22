@@ -22,7 +22,7 @@ LIBS += -lllapi
 
 all: $(PROG)
 
-$(PROG): $(CIVETWEB_LIB) $(LLAPI_LIB) $(SRC) test
+$(PROG): $(CIVETWEB_LIB) $(LLAPI_LIB) $(SRC) test nmos gui
 	$(CXX) -Llib -Wl,-rpath=/home/alexander/work/pro-av-work/rest/lib -o bin/$@ $(CFLAGS) $(LDFLAGS) $(SRC) lib/$(CIVETWEB_LIB) $(LIBS)
 
 
@@ -37,13 +37,21 @@ $(LLAPI_LIB):
 rest:
 	rm -f bin/rest_cpp
 	$(CXX) -Llib -Wl,-rpath=/home/alexander/work/pro-av-work/rest/lib -o bin/$@ $(CFLAGS) $(LDFLAGS) $(SRC) lib/$(CIVETWEB_LIB) $(LIBS) && mv bin/rest bin/rest_cpp
+
+nmos: 
+	cd apps/nmos && npm install --arch=armv7 --only=prod
+
+gui:
+	cd apps/gui && npm install --arch=armv7 --only=prod
 	
 test:
-	cd test/rest && npm i
+	cd test/rest && npm install --arch=armv7 --only=prod
 
 clean:
-	rm -f build/* bin/* lib/* test/rest/package-lock.json
+	rm -f build/* bin/* lib/* test/rest/package-lock.json apps/nmos/package-lock.json apps/gui/package-lock.json
 	rm -rf test/rest/node_modules
+	rm -rf apps/nmos/node_modules
+	rm -rf apps/gui/node_modules
 
 	
 .PHONY: all clean test

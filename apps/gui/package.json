@@ -1,0 +1,27 @@
+{
+  "name": "proav-node",
+  "version": "1.0.0",
+  "description": "Web application for proAV board",
+  "main": "bindings.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "proAV",
+    "web",
+    "nodejs",
+    "express"
+  ],
+  "author": "Alexander Tyutyarev",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "compression": "^1.7.3",
+    "cookie-parser": "^1.4.4",
+    "express": "^4.16.4",
+    "multer": "^1.4.1",
+    "pug": "^2.0.3",
+    "request": "^2.88.0",
+    "winston": "^2.3.1"
+  }
+}

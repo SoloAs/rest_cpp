@@ -1,0 +1,23 @@
+#!/usr/bin/env node
+
+var Browser = require('../server.js')
+
+var properties = {
+  ip: '0.0.0.0',
+  port: '7777'
+}
+
+for (var i = 2; i < process.argv.length; i++) {
+  var arg = /(\S+)=(\S+)/.exec(process.argv[i])
+  if (arg) properties[arg[1]] = arg[2]
+  else console.error(`Could not process argument ${i - 1}: '${process.argv[i]}'`)
+}
+
+if (isNaN(+properties.port) || +properties.port < 0) {
+  console.error('Port must be a positive number.')
+  process.exit(1)
+}
+
+var browser = new Browser.server(+properties.port, properties.ip)
+
+browser.init().start()

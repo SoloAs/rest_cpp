@@ -1,0 +1,90 @@
+extends layout.pug
+
+ 
+block page-titles
+  .row.page-titles
+    .col-md-5.col-8.align-self-center
+      h3.text-themecolor.m-b-0.m-t-0 ProAV
+      ol.breadcrumb
+        li.breadcrumb-item
+          a(href='javascript:void(0)') ProAV
+        li.breadcrumb-item.active Board
+
+block content
+  .card
+    .card-body
+      h3.card-title Board configuration
+      p.card-text
+        .form-row
+          form.col-6
+            .form-row.config-row
+              label.col-sm-2.col-form-label(for='mode') Mode
+              input#name.form-control.col-sm-4(type='text', name='mode', disabled='', value=config.mode)
+          form.col-6
+            .form-row.config-row
+              label.col-sm-2.col-form-label(for='company') Company
+              input#name.form-control.col-sm-4(type='text', name='company', disabled='', value=config.company)
+              i.fas.fa-edit.fa-2x.col-sm-1(onclick = "javascript:void(0)") 
+
+  .card
+    .card-body
+      h3.card-title Network Configuration
+      p.card-text
+        .form-row
+          form.col-6
+            .form-row.config-row
+              label.col-sm-2.col-form-label(for='ip') IP
+              input#name.form-control.col-sm-4(type='text', name='ip', disabled='', value=config.ip)
+              i.fas.fa-edit.fa-2x.col-sm-1(onClick = "javascript:void(0)")
+            .form-row.config-row
+              label.col-sm-2.col-form-label(for='port') Port
+              input#name.form-control.col-sm-4(type='text', name='port', disabled='', placeholder="80")
+              i.fas.fa-edit.fa-2x.col-sm-1(onclick = "javascript:void(0)") 
+          form.col-6
+            .form-row.config-row
+              label.col-sm-2.col-form-label(for='dhcp') DHCP
+              if (config.dhcp === "true")
+                select.form-control(name='dhcp', type='text').col-sm-4
+                  option(selected='') TRUE
+                  option FALSE
+              else 
+                select.form-control(name='dhcp', type='text').col-sm-4
+                  option TRUE
+                  option(selected='') FALSE
+            .form-row.config-row
+              label.col-sm-2.col-form-label(for='dns') DNS
+              input#name.form-control.col-sm-4(type='text', name='dns', disabled='', value=config.dns)
+              i.fas.fa-edit.fa-2x.col-sm-1(onclick = "javascript:void(0)")   
+
+  .card
+    .card-body
+      h3.card-title Logging
+      p.card-text
+        .form-row
+          form.col-6
+            .form-row.config-row
+              label.col-sm-2.col-form-label(for='name') Enabled
+              select.form-control(name='role', type='text').col-sm-4
+                option TRUE
+                option(selected='') FALSE
+          form.col-6
+            .form-row.config-row
+              label.col-sm-2.col-form-label(for='name') Count
+              input#name.form-control.col-sm-4(type='text', name='name', disabled='', placeholder="50")
+              i.fas.fa-edit.fa-2x.col-sm-1(onClick = "javascript:void(0)")
+            .form-row.config-row
+              label.col-sm-2.col-form-label(for='name') Limit
+              input#name.form-control.col-sm-4(type='text', name='name', disabled='', placeholder="10000")
+              i.fas.fa-edit.fa-2x.col-sm-1(onclick = "javascript:void(0)") 
+
+
+          //- | Board initialization menu
+
+    script.
+      patch_config = () => {
+        // TODO: implement
+      }
+
+
+
+
