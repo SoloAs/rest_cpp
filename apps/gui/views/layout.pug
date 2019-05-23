@@ -9,6 +9,8 @@ html(lang='en')
     meta(name='author', content='')
     // Favicon icon
     link(rel='icon', type='image/png', sizes='16x16', href='/assets/images/favicon.png')
+    // Toastr
+    link(rel='stylesheet', type='text/css', href='/assets/plugins/toast-master/css/jquery.toast.css')
     title
       | Material Pro Admin Template - The Most Complete & Trusted Bootstrap 4 Admin Template
     // Bootstrap Core CSS
@@ -121,10 +123,88 @@ html(lang='en')
     // Custom JavaScript
     script(src='/assets/js/custom.min.js')
     script(src='/assets/plugins/sweetalert/sweetalert.min.js')
+    // Toastr
+    script(src='/assets/plugins/toast-master/js/jquery.toast.js', type='text/javascript')
+    script(src='/assets/js/toastr.js', type='text/javascript')
+
     // ==============================================================
     // Style switcher
     // ==============================================================
     script(src='/assets/plugins/styleswitcher/jQuery.style.switcher.js')
+    
+    script.
+      notify_success = (text) => {
+        $.toast({
+          heading: 'Welcome to Monster admin',
+          text: text,
+          position: 'top-right',
+          loaderBg: '#ff6849',
+          icon: 'error',
+          hideAfter: 3500
+
+        });
+      }
+
+      
+    //- script.
+    //-   jQuery(function () {
+    //-     // Init page helpers (BS Notify Plugin)
+    //-     App.initHelpers('notify');
+    //-   });
+      
+    //-   function notifyOk(msg, icon = 'fa-check'){
+    //-     jQuery.notify({  
+    //-       icon: 'fa ' + icon,
+    //-       message: msg,
+    //-       url: ''
+    //-       }, {
+    //-         element: 'body',
+    //-         type: 'success',
+    //-         allow_dismiss: true,
+    //-         newest_on_top: true,
+    //-         showProgressbar: false,
+    //-         placement: {
+    //-           from: 'top',
+    //-           align: 'right'
+    //-         },
+    //-         offset: 20,
+    //-         spacing: 10,
+    //-         z_index: 1033,
+    //-         delay: 5000,
+    //-         timer: 1000,
+    //-         animate: {
+    //-           enter: 'animated fadeIn',
+    //-           exit: 'animated fadeOutDown'
+    //-         }
+    //-     });
+    //-   }
+
+    //-   function notifyError(msg, icon ='fa-times', err = ''){
+    //-     jQuery.notify({  
+    //-       icon: 'fa ' + icon,
+    //-       message: msg + ' Reason:' + err,
+    //-       url: ''
+    //-     }, {
+    //-       element: 'body',
+    //-       type: 'danger',
+    //-       allow_dismiss: true,
+    //-       newest_on_top: true,
+    //-       showProgressbar: false,
+    //-       placement: {
+    //-         from: 'top',
+    //-         align: 'right'
+    //-       },
+    //-       offset: 20,
+    //-       spacing: 10,
+    //-       z_index: 1033,
+    //-       delay: 5000,
+    //-       timer: 1000,
+    //-       animate: {
+    //-         enter: 'animated fadeIn',
+    //-         exit: 'animated fadeOutDown'
+    //-       }
+    //-     });
+    //-   }
 
     //- script.
     //-   verifyModulesVersions = (status) => {

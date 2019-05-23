@@ -21,7 +21,7 @@ bool error(CivetServer *server, struct mg_connection *conn, unsigned int code, c
 	std::string error_string = error.dump();
 
 	mg_printf(conn,
-		"HTTP/1.1 %u %s\r\nContent-Type: "
+		"HTTP/1.1 %u %s\r\nAccess-Control-Allow-Origin: *\r\nContent-Type: "
 		"application/json\r\nConnection: close\r\n\r\n", code, description);
 	mg_printf(conn, error_string.c_str());
 
@@ -32,7 +32,7 @@ bool success(CivetServer *server, struct mg_connection *conn, unsigned int code,
 {
 	std::string body_string = body.dump();
 	mg_printf(conn,
-		"HTTP/1.1 %u %s\r\nContent-Type: "
+		"HTTP/1.1 %u %s\r\nAccess-Control-Allow-Origin: *\r\nContent-Type: "
 		"application/json\r\nConnection: close\r\n\r\n", code, description);
 	if (body != NULL) 
 		mg_printf(conn, body_string.c_str());

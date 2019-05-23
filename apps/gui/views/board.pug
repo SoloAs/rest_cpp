@@ -3,12 +3,14 @@ extends layout.pug
  
 block page-titles
   .row.page-titles
-    .col-md-5.col-8.align-self-center
+    .col-md-2.col-8.align-self-center
       h3.text-themecolor.m-b-0.m-t-0 ProAV
       ol.breadcrumb
         li.breadcrumb-item
           a(href='javascript:void(0)') ProAV
         li.breadcrumb-item.active Board
+    button.btn.waves-effect.waves-light.btn-primary(type='button', onclick='reset_config_to_default()') Reset to Defaults
+
 
 block content
   .card
@@ -38,7 +40,7 @@ block content
               i.fas.fa-edit.fa-2x.col-sm-1(onClick = "javascript:void(0)")
             .form-row.config-row
               label.col-sm-2.col-form-label(for='port') Port
-              input#name.form-control.col-sm-4(type='text', name='port', disabled='', placeholder="80")
+              input#name.form-control.col-sm-4(type='text', name='port', disabled='', placeholder='80')
               i.fas.fa-edit.fa-2x.col-sm-1(onclick = "javascript:void(0)") 
           form.col-6
             .form-row.config-row
@@ -81,8 +83,22 @@ block content
           //- | Board initialization menu
 
     script.
+      var server = 'http://0.0.0.0:8081/v1.0';
+
       patch_config = () => {
         // TODO: implement
+      }
+
+      reset_config_to_default = () => {
+        notify_success('kek')
+        $.ajax({
+          url: server + '/config',
+          type: 'DELETE', cache: false,
+          crossDomain: true
+        })
+        .done((result) => {
+          console.log(result);
+        })
       }
 
 
