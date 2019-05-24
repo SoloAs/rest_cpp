@@ -5,19 +5,11 @@ var request = require('request');
 
 
 router.get('/', function (req, res, next) {
-    res.render('index');
+    res.render('board');
 })
 
 router.get('/board', function (req, res, next) {
-    request.get(server.SERVER_URL + "/config", (error, response, body) => {
-        let config;
-        if (!error && response.statusCode == 200) {
-            config = JSON.parse(body);
-            res.render('board', { config: config });
-        } else {
-            config = -1;
-        }
-    });
+    res.render('board');
 })
 
 router.get('/streams', function (req, res, next) {

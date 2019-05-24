@@ -316,7 +316,7 @@ class ConfigHandler : public CivetHandler
 
 		bool handleDelete(CivetServer *server, struct mg_connection *conn)
 		{
-			bool config_is_default = false;
+			bool config_is_default = false; 
 
 			if (current_config->mode == default_config.mode &&
 				current_config->company == default_config.company &&

@@ -21,12 +21,14 @@ block content
           form.col-6
             .form-row.config-row
               label.col-sm-2.col-form-label(for='mode') Mode
-              input#name.form-control.col-sm-4(type='text', name='mode', disabled='', value=config.mode)
+              select#mode.form-control(name='dhcp', type='text').col-sm-4  
+                option(value='rx') RX
+                option(value='tx' selected='') TX
           form.col-6
             .form-row.config-row
               label.col-sm-2.col-form-label(for='company') Company
-              input#name.form-control.col-sm-4(type='text', name='company', disabled='', value=config.company)
-              i.fas.fa-edit.fa-2x.col-sm-1(onclick = "javascript:void(0)") 
+              input#company.form-control.col-sm-4(type='text', name='company', disabled='')
+              i.fas.fa-edit.fa-2x.col-sm-1(data-toggle='modal' data-target='#patch-modal' onclick='call_modal("company")') 
 
   .card
     .card-body
@@ -36,27 +38,20 @@ block content
           form.col-6
             .form-row.config-row
               label.col-sm-2.col-form-label(for='ip') IP
-              input#name.form-control.col-sm-4(type='text', name='ip', disabled='', value=config.ip)
-              i.fas.fa-edit.fa-2x.col-sm-1(onClick = "javascript:void(0)")
+              input#ip.form-control.col-sm-4(type='text', name='ip', disabled='')
             .form-row.config-row
               label.col-sm-2.col-form-label(for='port') Port
-              input#name.form-control.col-sm-4(type='text', name='port', disabled='', placeholder='80')
-              i.fas.fa-edit.fa-2x.col-sm-1(onclick = "javascript:void(0)") 
+              input#port.form-control.col-sm-4(type='text', name='port', disabled='', placeholder='80') 
           form.col-6
             .form-row.config-row
               label.col-sm-2.col-form-label(for='dhcp') DHCP
-              if (config.dhcp === "true")
-                select.form-control(name='dhcp', type='text').col-sm-4
-                  option(selected='') TRUE
-                  option FALSE
-              else 
-                select.form-control(name='dhcp', type='text').col-sm-4
-                  option TRUE
-                  option(selected='') FALSE
+              select#dhcp.form-control(name='dhcp', type='text', onchange='patch_config("dhcp", $("#dhcp :selected").val()=="true")').col-sm-4  
+                option(value='true') TRUE
+                option(value='false') FALSE
             .form-row.config-row
               label.col-sm-2.col-form-label(for='dns') DNS
-              input#name.form-control.col-sm-4(type='text', name='dns', disabled='', value=config.dns)
-              i.fas.fa-edit.fa-2x.col-sm-1(onclick = "javascript:void(0)")   
+              input#dns.form-control.col-sm-4(type='text', name='dns', disabled='')
+              i.fas.fa-edit.fa-2x.col-sm-1(data-toggle='modal' data-target='#patch-modal' onclick='call_modal("dns")')  
 
   .card
     .card-body
@@ -65,42 +60,112 @@ block content
         .form-row
           form.col-6
             .form-row.config-row
-              label.col-sm-2.col-form-label(for='name') Enabled
-              select.form-control(name='role', type='text').col-sm-4
+              label.col-sm-2.col-form-label(for='enabled') Enabled
+              select#enabled.form-control(name='enabled', type='text').col-sm-4
                 option TRUE
                 option(selected='') FALSE
           form.col-6
             .form-row.config-row
               label.col-sm-2.col-form-label(for='name') Count
-              input#name.form-control.col-sm-4(type='text', name='name', disabled='', placeholder="50")
+              input#count.form-control.col-sm-4(type='text', name='count', disabled='', placeholder="50")
               i.fas.fa-edit.fa-2x.col-sm-1(onClick = "javascript:void(0)")
             .form-row.config-row
               label.col-sm-2.col-form-label(for='name') Limit
-              input#name.form-control.col-sm-4(type='text', name='name', disabled='', placeholder="10000")
-              i.fas.fa-edit.fa-2x.col-sm-1(onclick = "javascript:void(0)") 
+              input#limit.form-control.col-sm-4(type='text', name='limit', disabled='', placeholder="10000")
+              i.fas.fa-edit.fa-2x.col-sm-1(data-toggle='modal' data-target='#patch-modal' onclick='call_modal("limit")') 
 
+  #patch-modal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', style='display: none; padding-right: 13px;')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h4.modal-title Update field
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+        .modal-body
+          form
+            .form-group
+              label#patch-key.control-label(for='patch-value') Key:
+              input#patch-value.form-control(type='text')
+        .modal-footer
+          button.btn.btn-default.waves-effect(type='button', data-dismiss='modal') Close
+          button.btn.btn-danger.waves-effect.waves-light(type='button' onclick='patch_config()' data-dismiss='modal') Save changes
 
           //- | Board initialization menu
 
-    script.
-      var server = 'http://0.0.0.0:8081/v1.0';
+  script.
+    var server = 'http://0.0.0.0:8081/v1.0';
+    
+    get_config = () => {
+      $.ajax({
+        url: server + '/config',
+        type: 'GET', cache: false,
+        crossDomain: true,
+      })
+      .done((result) => {
+        $('#company').val(result.company)
+        $('#mode').val(result.mode.toLowerCase());
+        $('#mode').prop('disabled', 'disabled');
+        $('#dhcp').val(result.dhcp.toString());
+        $('#dns').val(result.dns);
+        $('#ip').val(result.ip);
+        notify_success('200', 'OK', 'Config obtained');
+      })
+      .fail((err) => {
+        control_layout('block');
+        notify_error(500, 'Internal server error', 'No access to server');
+      })
+    }
 
-      patch_config = () => {
-        // TODO: implement
-      }
+    window.onload = get_config;
 
-      reset_config_to_default = () => {
-        notify_success('kek')
-        $.ajax({
-          url: server + '/config',
-          type: 'DELETE', cache: false,
-          crossDomain: true
-        })
-        .done((result) => {
-          console.log(result);
-        })
-      }
+    patch_config = (key = $('#patch-key').text(), value = null) => {
+      if (value == null) value = $('#patch-value').val(); // null - comes from modal; !null - comes from other (i.e dropdown)
+      let data = {}; data[key] = value;
+      $.ajax({
+        url: server + '/config',
+        type: 'PATCH', cache: false,
+        crossDomain: true,
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'json',
+        data: JSON.stringify(data)
+      })
+      .done((result) => {
+        $('#' + key).val(value.toString());
+        notify_success('200', 'OK', 'Config updated');
+      })
+      .fail((res) => {
+        let error = res.responseJSON.error;
+        notify_error(error.status, error.description, error.message);
+      })
+    }
 
+    reset_config_to_default = () => {
+      $.ajax({
+        url: server + '/config',
+        type: 'DELETE', cache: false,
+        crossDomain: true
+      })
+      .done((result) => {
+        $('#mode').val(result.mode.toLowerCase());
+        $('#company').val(result.company);
+        $('#ip').val(result.ip);
+        $('#dns').val(result.dns);
+        // $('#port').val(result.port);
+        $('#dhcp').val(result.dhcp.toString());
+        notify_success('200', 'OK', 'Config reset');
+      })
+      .fail((res) => {
+          let error = res.responseJSON.error;
+          notify_error(error.status, error.description, error.message);
+      })
+    }
+  
+    // ===============================
+    // ========== UTIL ===============
+    // ===============================
+
+    call_modal = (value) => {
+      $('#patch-key').text(value);
+    }
 
 
 

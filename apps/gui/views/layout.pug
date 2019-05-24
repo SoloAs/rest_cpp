@@ -133,79 +133,54 @@ html(lang='en')
     script(src='/assets/plugins/styleswitcher/jQuery.style.switcher.js')
     
     script.
-      notify_success = (text) => {
+      notify_success = (code, msg, text) => {
         $.toast({
-          heading: 'Welcome to Monster admin',
+          heading: code + ": " + msg,
           text: text,
           position: 'top-right',
           loaderBg: '#ff6849',
-          icon: 'error',
+          bgColor: '#009919',
+          icon: 'success',
           hideAfter: 3500
-
         });
       }
 
-      
-    //- script.
-    //-   jQuery(function () {
-    //-     // Init page helpers (BS Notify Plugin)
-    //-     App.initHelpers('notify');
-    //-   });
-      
-    //-   function notifyOk(msg, icon = 'fa-check'){
-    //-     jQuery.notify({  
-    //-       icon: 'fa ' + icon,
-    //-       message: msg,
-    //-       url: ''
-    //-       }, {
-    //-         element: 'body',
-    //-         type: 'success',
-    //-         allow_dismiss: true,
-    //-         newest_on_top: true,
-    //-         showProgressbar: false,
-    //-         placement: {
-    //-           from: 'top',
-    //-           align: 'right'
-    //-         },
-    //-         offset: 20,
-    //-         spacing: 10,
-    //-         z_index: 1033,
-    //-         delay: 5000,
-    //-         timer: 1000,
-    //-         animate: {
-    //-           enter: 'animated fadeIn',
-    //-           exit: 'animated fadeOutDown'
-    //-         }
-    //-     });
-    //-   }
+      notify_error = (code, msg, text) => {
+        $.toast({
+          heading: code + ": " + msg,
+          text: text,
+          position: 'top-right',
+          loaderBg: '#ff6849',
+          bgColor: '#B3001E',
+          icon: 'error',
+          hideAfter: 3500
+        });
+      }
 
-    //-   function notifyError(msg, icon ='fa-times', err = ''){
-    //-     jQuery.notify({  
-    //-       icon: 'fa ' + icon,
-    //-       message: msg + ' Reason:' + err,
-    //-       url: ''
-    //-     }, {
-    //-       element: 'body',
-    //-       type: 'danger',
-    //-       allow_dismiss: true,
-    //-       newest_on_top: true,
-    //-       showProgressbar: false,
-    //-       placement: {
-    //-         from: 'top',
-    //-         align: 'right'
-    //-       },
-    //-       offset: 20,
-    //-       spacing: 10,
-    //-       z_index: 1033,
-    //-       delay: 5000,
-    //-       timer: 1000,
-    //-       animate: {
-    //-         enter: 'animated fadeIn',
-    //-         exit: 'animated fadeOutDown'
-    //-       }
-    //-     });
-    //-   }
+      notify_warning = (code, msg, text) => {
+        $.toast({
+          heading: code + ": " + msg,
+          text: text,
+          position: 'top-right',
+          loaderBg: '#ff6849',
+          bgColor: '#999900',
+          icon: 'warning',
+          hideAfter: 3500
+        });
+      }
 
+      control_layout = (action) => {
+      var overlay = $("<div id='block' style='width:100%; height: 100%; top: 0; z-index: 100; position: absolute; background: lightgray; opacity: 0.8; text-align: center; font-size: large; padding-top: 25%; font-weight: bold;'>Lowlevel API is unavailable</div>");
+        if (action === 'block') {
+          $("body").append(overlay); 
+        } else if (action === 'release') {
+            $('#block').remove()
+          }
+      }
+
+
+      
+   
     //- script.
     //-   verifyModulesVersions = (status) => {
     //-     if (status === 2) 
@@ -249,12 +224,6 @@ html(lang='en')
     //-     console.log(status);
     //-   }
 
-    //-   controlLayout = (action) => {
-    //-     var overlay = $("<div id='block' style='width:100%; height: 100%; top: 0; z-index: 100; position: absolute; background: lightgray; opacity: 0.5; text-align: center; font-size: large; padding-top: 25%; font-weight: bold;'>Lowlevel API is unavailable</div>");
-    //-     if (action === 'block') {
-    //-       $("body").append(overlay); 
-    //-     } else if (action === 'release') {
-    //-         $('#block').remove()
-    //-       }
+
 
     //-   }
