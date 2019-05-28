@@ -388,7 +388,7 @@ class StreamsHandler : public CivetHandler
 				return error(server, conn, 404, "Not Found", "Not Found");
 			} else 
 			{
-				for (uint i = 0; i < rx_streams.size(); i++)
+				for (uint i = 0; i < rx_streams.size(); i++) 
 				{
 					if (strcmp(rx_streams[i].id, stream_id.c_str()) == 0)
 					{
@@ -611,6 +611,68 @@ class ExitHandler : public CivetHandler
 	}
 };
 
+//==================================================================
+//=============================DEMO=================================
+//==================================================================
+
+#define DEMO_URI VERSION "/demo"
+demostream dstream;
+class DemoHandler : public CivetHandler
+{
+  public:
+	bool handleGet(CivetServer *server, struct mg_connection *conn)
+	{
+		if(strcmp(dstream.ip, "") == 0) 
+		{
+			return error(server, conn, 404, "Not Found", "Demostream is not setup");
+		}
+
+		json json_stream = {
+			{"ip", dstream.ip},
+			// {"mac", dstream.mac},
+			{"port", dstream.port}
+		};
+
+		return success(server, conn, 200, "OK", json_stream);
+	}
+	
+	bool handlePost(CivetServer *server, struct mg_connection *conn)
+	{
+			const mg_request_info *ri = mg_get_request_info(conn);
+			char *post_data_c = new char[ri->content_length + 1]; // one byte for null symbol
+			int result = get_request_body(conn, post_data_c, ri->content_length);
+			std::string post_data(post_data_c); 
+
+			
+			if (result > 0) 
+			{
+				json j = json::parse(post_data);
+				
+				strcpy(dstream.ip, ((std::string)j["ip"]).c_str());
+				// strcpy(dstream.mac, ((std::string)j["mac"]).c_str());
+				dstream.port = std::stoi((std::string)j["port"]);
+				
+				// TODO: handle LL API stream setup
+
+
+			} else 
+			{
+				return error(server, conn, 400, "Bad Request", "Incorrect or missing mandatory attributes");
+			}
+
+			delete[] post_data_c;
+			
+			return success(server, conn, 201, "Created");
+	}
+
+	bool handleDelete(CivetServer *server, struct mg_connection *conn)
+	{
+		strcpy(dstream.ip, "");
+		dstream.port = 0;
+		
+		return success(server, conn, 204, "Deleted");
+	}
+};
 
 int main(int argc, char *argv[])
 {
@@ -649,6 +711,9 @@ int main(int argc, char *argv[])
 	StreamsHandler h_streams;
 	server.addHandler(STREAMS_URI, h_streams);
 
+	DemoHandler h_demo;
+	server.addHandler(DEMO_URI, h_demo);
+
 
 	printf("Run server at http://localhost:%s/\n", PORT);
 	printf("Status API at http://localhost:%s%s\n", PORT, STATUS_URI);
@@ -656,7 +721,8 @@ int main(int argc, char *argv[])
 	printf("Reset API at http://localhost:%s%s\n", PORT, RESET_URI);
 	printf("Config API at http://localhost:%s%s\n", PORT, CONFIG_URI);
 	printf("Streams API at http://localhost:%s%s\n", PORT, STREAMS_URI);
-	printf("Exit at http://localhost:%s%s\n", PORT, EXIT_URI);
+	printf("Exit at http://localhost:%s%s\n\n", PORT, EXIT_URI);
+	printf("Demo at http://localhost:%s%s\n\n", PORT, DEMO_URI);
 
 	while (!exitNow) {
 		sleep(1);

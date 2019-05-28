@@ -11,3 +11,10 @@ struct config
     bool dhcp;
     bool igmp;
 };
+
+struct demostream
+{
+    char ip[20];
+    // char mac[20];
+    int port;
+};

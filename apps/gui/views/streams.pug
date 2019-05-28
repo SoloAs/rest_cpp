@@ -15,7 +15,168 @@ block content
     .col-12
       .card
         .card-body
-          | FPGA configuration page
+          if (mode === 'RX')
+            h3.card-title RX streaming configuration
+            p.card-text
+              .table-responsive.color-table.primary-table
+                table#streams-table.table.table-hover
+                  thead
+                    tr
+                      th #
+                      th IP
+                      //- th MAC
+                      th Port
+                  tbody
+                button.btn.waves-effect.waves-light.btn-primary(type='button' data-toggle='modal' data-target='#streams-modal') Add flow
+                button.btn.waves-effect.waves-light.btn-danger(type='button' onclick='clear_streams()' style="margin-left: 5px") Clear Streams
+
+
+          else 
+            h3.card-title TX streaming configuration
+            p.card-text
+              .table-responsive.color-table.primary-table
+                table#streams-table.table.table-hover
+                  thead
+                    tr
+                      th #
+                      th IP
+                      //- th MAC
+                      th Port
+                  tbody
+                button.btn.waves-effect.waves-light.btn-primary(type='button' data-toggle='modal' data-target='#streams-modal') Add Stream
+                button.btn.waves-effect.waves-light.btn-danger(type='button' onclick='clear_streams()' style="margin-left: 5px") Clear Streams
+
+
+  #streams-modal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', style='display: none; padding-right: 13px;')
+      .modal-dialog
+        .modal-content
+          .modal-header
+            h4.modal-title Send to
+            button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          .modal-body
+            form
+              .form-group
+                label.control-label(for='stream-ip') IP
+                input#stream-ip.form-control(type='text')
+              //- .form-group
+              //-   label.control-label(for='stream-mac') MAC
+              //-   input#stream-mac.form-control(type='text')
+              .form-group
+                label.control-label(for='stream-port') PORT
+                input#stream-port.form-control(type='text')
+          .modal-footer
+            button.btn.btn-default.waves-effect(type='button', data-dismiss='modal') Close
+            button.btn.btn-danger.waves-effect.waves-light(type='button' onclick='post_streams("' + mode + '")' data-dismiss='modal') Add stream
+
+  script.
+    var server = 'http://0.0.0.0:8081/v1.0';
+
+
+    get_streams = () => {
+      $.ajax({
+        url: server + '/demo',
+        type: 'GET', cache: false,
+        crossDomain: true,
+        contentType: 'application/json; charset=utf-8'
+      })
+      .done((result) => {
+        let table = $('#streams-table > tbody')
+        var row = ''
+        row += '<tr>';
+        row += '<td><span class="text-danger text-semibold"><i class="fa fa-level-down" aria-hidden="true"></i>1</span></td>';
+        row += '<td>' + result.ip + '</td>';
+        // row += '<td>' + result.mac + '</td>';
+        row += '<td>' + result.port + '</td>';
+        table.append(row);
+        notify_success('200', 'OK', 'Streams obtained');
+      })
+      .fail((res) => {
+        let error = res.responseJSON.error;
+        notify_error(error.status, error.description, error.message);
+      })
+    }
+
+    window.onload = get_streams;
+
+    post_streams = (mode) => {
+      let data = {};
+      if (mode === 'RX') {
+        data.ip = $('#stream-ip').val();
+        // data.mac = $('#stream-mac').val();
+        data.port = $('#stream-port').val();
+
+        $.ajax({
+          url: server + '/demo',
+          type: 'POST', cache: false,
+          crossDomain: true,
+          contentType: 'application/json; charset=utf-8',
+          data: JSON.stringify(data)
+        })
+        .done((result) => {
+          let table = $('#streams-table > tbody')
+          table.empty();
+          var row = ''
+          row += '<tr>';
+          row += '<td><span class="text-danger text-semibold"><i class="fa fa-level-down" aria-hidden="true"></i>1</span></td>';
+          row += '<td>' + data.ip + '</td>';
+          // row += '<td>' + data.mac + '</td>';
+          row += '<td>' + data.port + '</td>';
+          table.append(row);
+          notify_success('201', 'Created', 'Stream created');
+        })
+        .fail((res) => {
+          let error = res.responseJSON.error;
+          notify_error(error.status, error.description, error.message);
+        })
+      } else {
+        data.ip = $('#stream-ip').val();
+        // data.mac = $('#stream-mac').val();
+        data.port = $('#stream-port').val();
+
+        $.ajax({
+          url: server + '/demo',
+          type: 'POST', cache: false,
+          crossDomain: true,
+          contentType: 'application/json; charset=utf-8',
+          data: JSON.stringify(data)
+        })
+        .done((result) => {
+          let table = $('#streams-table > tbody')
+          table.empty();
+          var row = ''
+          row += '<tr>';
+          row += '<td><span class="text-danger text-semibold"><i class="fa fa-level-down" aria-hidden="true"></i>1</span></td>';
+          row += '<td>' + data.ip + '</td>';
+          // row += '<td>' + data.mac + '</td>';
+          row += '<td>' + data.port + '</td>';
+          table.append(row);
+          notify_success('201', 'Created', 'Stream created');
+        })
+        .fail((res) => {
+          let error = res.responseJSON.error;
+          notify_error(error.status, error.description, error.message);
+        })
+      }
+    }
+
+    clear_streams = () => {
+        $.ajax({
+          url: server + '/demo',
+          type: 'DELETE', cache: false,
+          crossDomain: true
+        })
+        .done((result) => {
+          let table = $('#streams-table > tbody')
+          table.empty();
+          notify_success('204', 'Deleted', 'Streams cleared');
+        })
+        .fail((res) => {
+          let error = res.responseJSON.error;
+          notify_error(error.status, error.description, error.message);
+        })
+    }
+
+
 
 
 

@@ -36,6 +36,8 @@ bool success(CivetServer *server, struct mg_connection *conn, unsigned int code,
 		"application/json\r\nConnection: close\r\n\r\n", code, description);
 	if (body != NULL) 
 		mg_printf(conn, body_string.c_str());
+	else 
+		mg_printf(conn, "{}");
 
 	return true;
 }

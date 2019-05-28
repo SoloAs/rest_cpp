@@ -3,13 +3,13 @@ extends layout.pug
  
 block page-titles
   .row.page-titles
-    .col-md-2.col-8.align-self-center
+    .col-md-11.col-8.align-self-center
       h3.text-themecolor.m-b-0.m-t-0 ProAV
       ol.breadcrumb
         li.breadcrumb-item
           a(href='javascript:void(0)') ProAV
         li.breadcrumb-item.active Board
-    button.btn.waves-effect.waves-light.btn-primary(type='button', onclick='reset_config_to_default()') Reset to Defaults
+    button.btn.justify-content-endwaves-effect.waves-light.btn-primary(type='button', onclick='reset_config_to_default()') Reset to Defaults
 
 
 block content
@@ -165,6 +165,7 @@ block content
 
     call_modal = (value) => {
       $('#patch-key').text(value);
+      $('#patch-value').val("");
     }
 
 

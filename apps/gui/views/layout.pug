@@ -48,14 +48,6 @@ html(lang='en')
             // ==============================================================
             .navbar-header
               a.navbar-brand(href='index.html')
-                // Logo icon
-                b
-                  // You can put here icon as well // <i class="wi wi-sunset"></i> //
-                  // Dark Logo icon
-                  img.dark-logo(src='../assets/images/logo-icon.png', alt='homepage')
-                  // Light Logo icon
-                  img.light-logo(src='../assets/images/logo-light-icon.png', alt='homepage')
-                // End Logo icon
                 // Logo text
                 span(style='')
                   // Light Logo text
@@ -99,9 +91,29 @@ html(lang='en')
         .container-fluid
           
           block page-titles
+          .col-md-7.col-4.align-self-center
+              div
+                button.right-side-toggle.waves-effect.waves-light.btn-success.btn.btn-circle.btn-sm.pull-right.m-l-10(data-toggle='modal' data-target='#actions-modal')
+                  i.ti-settings.text-white
+
+
           block content
         footer.footer
           | © 2018 Made by Macnica <3 
+
+    #actions-modal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', style='display: none; padding-right: 13px;')
+      .modal-dialog
+        .modal-content
+          .modal-header
+            h4.modal-title Actions
+            button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          .modal-body
+            select#actions.form-control(name='actions', type='text', onchange='').col-sm-12 
+                option(value='reset_board') Reset board
+                option(value='reset_config') Reset configuration
+          .modal-footer
+            button.btn.btn-default.waves-effect(type='button', data-dismiss='modal') Close
+            button.btn.btn-danger.waves-effect.waves-light(type='button' onclick='patch_config()' data-dismiss='modal') Invoke   
 
 
     // ==============================================================

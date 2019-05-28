@@ -13,8 +13,16 @@ router.get('/board', function (req, res, next) {
 })
 
 router.get('/streams', function (req, res, next) {
-
-    res.render('streams');
+    let mode;
+    request.get(server.SERVER_URL + '/config', (error, response, body) => {
+        if (!error && response.statusCode == 200) {
+            let json_config = JSON.parse(body);
+            mode = json_config.mode;
+            res.render('streams', { mode: mode });
+        } else {
+            res.render('streams', { mode: 'RX' }) // by default
+        }
+    })
 })
 
 router.get('/stats', function (req, res, next) {
